@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TN63_ROPE | Cloud Stock & Payment Management</title>
+    <link rel="icon" type="image/png" href="image.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDK (Compatibility version for direct browser execution) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --secondary: #0f172a;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --card-bg: #ffffff;
+            --body-bg: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 14px -2px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.1);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--body-bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        /* HEADER */
+        header {
+            background: #ffffff;
+            border-bottom: 1.5px solid var(--border-color);
+            padding: 12px 20px;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+            position: relative;
+            z-index: 50;
+        }
+
+        .header-content {
+            max-width: 1240px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-box {
+            display: flex;
+            align-items: center;
+        }
+
+        .main-logo-img {
+            height: 54px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.04));
+            transition: var(--transition);
+        }
+
+        .main-logo-img:hover {
+            transform: scale(1.02);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .cloud-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 12.5px;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+
+        .cloud-connected {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+        }
+
+        .cloud-disconnected {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            cursor: pointer;
+        }
+
+        .cloud-disconnected:hover {
+            background: #fef3c7;
+        }
+
+        .btn-settings {
+            background: #f8fafc;
+            border: 1.5px solid #cbd5e1;
+            color: #1e293b;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+
+        .btn-settings:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        /* NOTICE BANNER */
+        .notice-banner {
+            max-width: 1240px;
+            margin: 18px auto 0;
+            padding: 12px 18px;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 12px;
+            color: #92400e;
+            font-size: 13.5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .notice-banner button {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 1240px;
+            margin: 25px auto;
+            padding: 0 20px;
+        }
+
+        /* METRICS DASHBOARD */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 22px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: #cbd5e1;
+        }
+
+        .card-info h3 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .card-info p {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.1;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .icon-blue { background: #e0e7ff; color: #4338ca; }
+        .icon-purple { background: #f3e8ff; color: #7e22ce; }
+        .icon-green { background: #dcfce7; color: #15803d; }
+        .icon-amber { background: #fee2e2; color: #b91c1c; }
+
+        /* SECTION BOX */
+        .section-box {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            padding: 24px 28px;
+            margin-bottom: 28px;
+            transition: var(--transition);
+        }
+
+        .section-box:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .section-title-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title h2 {
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title .count-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        /* FORM INPUT GRID */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 14px;
+            color: var(--text-main);
+            background: #ffffff;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+        }
+
+        input::placeholder {
+            color: #94a3b8;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            height: 47px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            height: auto;
+        }
+
+        .btn-sell {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+        .btn-sell:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-add-unit {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .btn-add-unit:hover {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .btn-delete:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-whatsapp {
+            background: #25d366;
+            color: white;
+            border: 1px solid #1ebd5b;
+            font-weight: 700;
+        }
+        .btn-whatsapp:hover {
+            background: #1ebc57;
+            color: white;
+            box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-collect {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            font-weight: 700;
+        }
+        .btn-collect:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .tab-btn {
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1.5px solid var(--border-color);
+            background: white;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .tab-btn.tab-pending.active {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: white;
+        }
+
+        .row-pending {
+            border-left: 4px solid #ef4444 !important;
+            background: #fff8f8;
+        }
+
+        /* SEARCH BAR */
+        .search-box {
+            position: relative;
+            max-width: 280px;
+        }
+
+        .search-box input {
+            padding-left: 36px;
+            border-radius: 20px;
+            font-size: 13px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        /* TABLES */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: white;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            text-align: left;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 14px 18px;
+            border-bottom: 1.5px solid var(--border-color);
+        }
+
+        td {
+            padding: 14px 18px;
+            font-size: 13.5px;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr {
+            transition: background 0.15s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 700;
+        }
+
+        .badge-success { background: var(--success-light); color: #065f46; }
+        .badge-warning { background: var(--warning-light); color: #92400e; }
+        .badge-danger { background: var(--danger-light); color: #991b1b; }
+
+        .badge-method {
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .price-text {
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .action-btns {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            padding: 45px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 42px;
+            margin-bottom: 10px;
+            opacity: 0.7;
+        }
+
+        /* TOAST NOTIFICATION */
+        #toastContainer {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #0f172a;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            max-width: 380px;
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.danger { border-left: 4px solid var(--danger); }
+        .toast.warning { border-left: 4px solid var(--warning); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 26px 30px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            text-align: left;
+            animation: scaleIn 0.2s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-box h3 {
+            font-size: 19px;
+            margin-bottom: 8px;
+            color: var(--secondary);
+        }
+
+        .modal-box p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* FIREBASE CONFIG INPUTS */
+        .config-field {
+            margin-bottom: 12px;
+        }
+        .config-field label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .config-field input, .config-field textarea {
+            font-size: 13px;
+            font-family: monospace;
+            padding: 8px 12px;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1024px) {
+            .cards { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 640px) {
+            .cards { grid-template-columns: 1fr; }
+            .header-content { flex-direction: column; align-items: flex-start; }
+            .main-logo-img { height: 40px; max-width: 100%; }
+            .section-box { padding: 18px 16px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .btn { width: 100%; }
+            .search-box { max-width: 100%; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="header-content">
+            <div class="brand-box">
+                <img src="image.png" alt="TN63_ROPE PRO Logo" class="main-logo-img">
+            </div>
+            <div class="header-actions">
+                <div id="cloudStatusBadge" class="cloud-badge cloud-disconnected" onclick="openFirebaseSettings()">
+                    <span>☁️</span> <span id="cloudStatusText">Connecting Cloud...</span>
+                </div>
+                <button class="btn-settings" onclick="openFirebaseSettings()">⚙️ Firebase Config</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- FIREBASE NOTICE (Visible only if Firebase keys not configured) -->
+    <div id="setupNoticeBanner" class="notice-banner" style="display: none;">
+        <div>
+            <strong>⚡ Firebase Setup Required:</strong> Your data is currently saved locally. Click to add your Firebase keys to enable cloud sync across all phones & PCs.
+        </div>
+        <button onclick="openFirebaseSettings()">Connect Firebase</button>
+    </div>
+
+    <div class="container">
+
+        <!-- DASHBOARD METRIC CARDS -->
+        <div class="cards">
+            <div class="card">
+                <div class="card-info">
+                    <h3>Total Products</h3>
+                    <p id="totalProducts">0</p>
+                </div>
+                <div class="card-icon icon-blue">📦</div>
+            </div>
+
+            <div class="card">
+                <div class="card-info">
+                    <h3>Total Stock Units</h3>
+                    <p id="totalStock">0</p>
+                </div>
+                <div class="card-icon icon-purple">📊</div>
+            </div>
+
+            <div class="card">
+                <div class="card-info">
+                    <h3>Total Collected</h3>
+                    <p>₹<span id="totalPaid">0</span></p>
+                </div>
+                <div class="card-icon icon-green">💰</div>
+            </div>
+
+            <div class="card">
+                <div class="card-info">
+                    <h3>Pending Balance</h3>
+                    <p>₹<span id="totalPending">0</span></p>
+                </div>
+                <div class="card-icon icon-amber">⏳</div>
+            </div>
+        </div>
+
+        <!-- 1. ADD PRODUCT SECTION -->
+        <div class="section-box">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <h2>📦 Add Product / Inward Stock</h2>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Product Name *</label>
+                    <input id="name" type="text" placeholder="e.g. Nylon Rope, Cotton Thread">
+                </div>
+
+                <div class="input-group">
+                    <label>Colour</label>
+                    <input id="colour" type="text" placeholder="e.g. White, Blue, Multicolor">
+                </div>
+
+                <div class="input-group">
+                    <label>Size / Thickness</label>
+                    <input id="size" type="text" placeholder="e.g. 4mm, 6mm, 100m Roll">
+                </div>
+
+                <div class="input-group">
+                    <label>Quantity *</label>
+                    <input id="quantity" type="number" min="1" placeholder="Stock Units">
+                </div>
+
+                <div class="input-group">
+                    <label>Selling Price (₹) *</label>
+                    <input id="price" type="number" min="0" placeholder="Price per unit">
+                </div>
+
+                <button class="btn btn-primary" id="btnAddStock" onclick="addProduct()">
+                    <span>➕</span> Add Stock
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. STOCK DETAILS TABLE -->
+        <div class="section-box">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <h2>📋 Stock Inventory</h2>
+                    <span class="count-badge" id="productCountBadge">0 Items</span>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="stockSearch" placeholder="Search product / colour..." onkeyup="filterStock()">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Colour</th>
+                            <th>Size</th>
+                            <th>Stock Status</th>
+                            <th>Unit Price</th>
+                            <th>Total Asset Value</th>
+                            <th style="text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockTableBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. PAYMENT & SALES ENTRY -->
+        <div class="section-box">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <h2>💳 Sales & Payment Entry</h2>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Customer Name *</label>
+                    <input id="customer" type="text" placeholder="e.g. Kumar, Selvam Stores">
+                </div>
+
+                <div class="input-group">
+                    <label>WhatsApp / Mobile No.</label>
+                    <input id="customerPhone" type="tel" placeholder="e.g. 9876543210 (Optional)">
+                </div>
+
+                <div class="input-group">
+                    <label>Product Sold *</label>
+                    <select id="saleProductSelect" onchange="onProductSelectChange()">
+                        <option value="">-- Choose Product --</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Quantity *</label>
+                    <input id="saleQuantity" type="number" min="1" placeholder="Quantity sold" oninput="calculateTotalAmount()">
+                </div>
+
+                <div class="input-group">
+                    <label>Total Amount (₹) *</label>
+                    <input id="totalAmount" type="number" min="0" placeholder="Total Bill (₹)">
+                </div>
+
+                <div class="input-group">
+                    <label>Paid Amount (₹) *</label>
+                    <input id="paidAmount" type="number" min="0" placeholder="Amount received">
+                </div>
+
+                <div class="input-group">
+                    <label>Payment Method</label>
+                    <select id="paymentMethod">
+                        <option value="Cash">💵 Cash</option>
+                        <option value="UPI">📱 UPI (GPay/PhonePe)</option>
+                        <option value="Card">💳 Card</option>
+                        <option value="Bank Transfer">🏦 Bank Transfer</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-success" id="btnSavePayment" onclick="addPayment()">
+                    <span>💾</span> Save Record
+                </button>
+            </div>
+        </div>
+
+        <!-- 4. PAYMENT HISTORY TABLE -->
+        <div class="section-box">
+            <div class="section-title">
+                <div class="section-title-left">
+                    <h2>🧾 Sales & Payment History</h2>
+                    <span class="count-badge" id="paymentCountBadge">0 Records</span>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <div class="filter-tabs">
+                        <button class="tab-btn active" id="tabAllPayments" onclick="setPaymentFilter('all')">All Records</button>
+                        <button class="tab-btn tab-pending" id="tabPendingPayments" onclick="setPaymentFilter('pending')">🚨 Pending Dues (<span id="pendingCountBadge">0</span>)</button>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="paymentSearch" placeholder="Search customer / date..." onkeyup="filterPayments()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Total Bill</th>
+                            <th>Paid</th>
+                            <th>Pending</th>
+                            <th>Method</th>
+                            <th style="text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentTableBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer"></div>
+
+    <!-- CUSTOM CONFIRMATION MODAL -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-box" style="text-align: center;">
+            <div style="font-size: 38px; margin-bottom: 8px;">⚠️</div>
+            <h3 id="modalTitle">Confirm Action</h3>
+            <p id="modalDesc">Are you sure you want to proceed?</p>
+            <div class="modal-actions" style="justify-content: center;">
+                <button class="btn btn-sm" style="background:#e2e8f0; color:#334155;" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-sm btn-delete" id="modalConfirmBtn">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- COLLECT DUE MODAL -->
+    <div class="modal-overlay" id="collectDueModal">
+        <div class="modal-box" style="max-width: 440px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3>💵 Settle / Collect Due</h3>
+                <span style="cursor:pointer; font-size:20px;" onclick="closeCollectModal()">✖</span>
+            </div>
+            <div id="collectCustomerDetails" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 16px; font-size: 13.5px; line-height: 1.6;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div class="input-group" style="margin-bottom: 12px;">
+                <label>Amount Paying Now (₹) *</label>
+                <input id="collectDueAmount" type="number" min="1">
+            </div>
+
+            <div class="input-group" style="margin-bottom: 16px;">
+                <label>Payment Method</label>
+                <select id="collectDueMethod">
+                    <option value="Cash">💵 Cash</option>
+                    <option value="UPI">📱 UPI (GPay/PhonePe)</option>
+                    <option value="Card">💳 Card</option>
+                    <option value="Bank Transfer">🏦 Bank Transfer</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-sm" style="background:#e2e8f0; color:#334155;" onclick="closeCollectModal()">Cancel</button>
+                <button class="btn btn-sm btn-success" id="btnSaveCollectDue" onclick="submitCollectDue()">✓ Update & Settle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE SETTINGS MODAL -->
+    <div class="modal-overlay" id="firebaseModal">
+        <div class="modal-box" style="max-width: 540px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3>⚙️ Firebase Cloud Configuration</h3>
+                <span style="cursor:pointer; font-size:20px;" onclick="closeFirebaseSettings()">✖</span>
+            </div>
+            <p>Paste your Firebase Web App credentials below. This allows all stock & payment data to sync live across all your devices!</p>
+
+            <div class="config-field">
+                <label>API Key</label>
+                <input id="fb_apiKey" type="text" value="AIzaSyDOs_kcqhvONrjQ9j7I8UGtGPxjMT0FWbc">
+            </div>
+
+            <div class="config-field">
+                <label>Project ID</label>
+                <input id="fb_projectId" type="text" value="tn63-9c8b7">
+            </div>
+
+            <div class="config-field">
+                <label>Auth Domain</label>
+                <input id="fb_authDomain" type="text" value="tn63-9c8b7.firebaseapp.com">
+            </div>
+
+            <div class="config-field">
+                <label>Storage Bucket</label>
+                <input id="fb_storageBucket" type="text" value="tn63-9c8b7.firebasestorage.app">
+            </div>
+
+            <div class="config-field">
+                <label>App ID</label>
+                <input id="fb_appId" type="text" value="1:635986566567:web:2107c5ebabfbb07916aa82">
+            </div>
+
+            <div style="font-size: 12px; color: #64748b; background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                💡 <strong>Where to find this:</strong> Firebase Console &rarr; Project Settings (⚙️) &rarr; "Your Apps" &rarr; Web app config.
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-sm" style="background:#e2e8f0; color:#334155;" onclick="closeFirebaseSettings()">Close</button>
+                <button class="btn btn-sm btn-primary" onclick="saveFirebaseSettings()">Save & Connect</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================
+           FIREBASE CONFIGURATION
+        ========================================================== */
+        const defaultFirebaseConfig = {
+            apiKey: "AIzaSyDOs_kcqhvONrjQ9j7I8UGtGPxjMT0FWbc",
+            authDomain: "tn63-9c8b7.firebaseapp.com",
+            projectId: "tn63-9c8b7",
+            storageBucket: "tn63-9c8b7.firebasestorage.app",
+            messagingSenderId: "635986566567",
+            appId: "1:635986566567:web:2107c5ebabfbb07916aa82",
+            measurementId: "G-4DV761SXLX"
+        };
+
+        // Check if Firebase keys are present
+        function hasValidFirebaseConfig(cfg) {
+            return cfg && cfg.apiKey && cfg.apiKey.trim() !== "" && cfg.projectId && cfg.projectId.trim() !== "";
+        }
+
+        let savedConfig = null;
+        try {
+            savedConfig = JSON.parse(localStorage.getItem("TN63_FIREBASE_CONFIG"));
+        } catch(e) {}
+
+        let firebaseConfig = (hasValidFirebaseConfig(savedConfig)) ? savedConfig : defaultFirebaseConfig;
+        localStorage.setItem("TN63_FIREBASE_CONFIG", JSON.stringify(firebaseConfig));
+
+        let db = null;
+        let isFirebaseActive = false;
+
+        // Local state lists
+        let products = [];
+        let payments = [];
+
+        /* ==========================================================
+           INITIALIZE FIREBASE
+        ========================================================== */
+        function initFirebase() {
+            if (hasValidFirebaseConfig(firebaseConfig)) {
+                try {
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(firebaseConfig);
+                    }
+                    if (firebase.analytics && firebaseConfig.measurementId) {
+                        try { firebase.analytics(); } catch(e) {}
+                    }
+                    db = firebase.firestore();
+                    isFirebaseActive = true;
+                    setCloudStatus(true);
+                    document.getElementById("setupNoticeBanner").style.display = "none";
+                    setupFirestoreListeners();
+                    showToast("☁️ Connected to Firebase Cloud Database (tn63-9c8b7)!", "success");
+                    return;
+                } catch (err) {
+                    console.error("Firebase init error:", err);
+                    isFirebaseActive = false;
+                    setCloudStatus(false, "Connection Failed");
+                    showToast("Firebase connect aga mudiyala: " + err.message, "danger");
+                }
+            } else {
+                // Fallback to localStorage
+                isFirebaseActive = false;
+                setCloudStatus(false, "Local Mode (No Cloud)");
+                document.getElementById("setupNoticeBanner").style.display = "flex";
+                loadLocalData();
+            }
+        }
+
+        function setCloudStatus(connected, textOverride = null) {
+            const badge = document.getElementById("cloudStatusBadge");
+            const text = document.getElementById("cloudStatusText");
+
+            if (connected) {
+                badge.className = "cloud-badge cloud-connected";
+                text.innerText = textOverride || "Cloud Connected";
+            } else {
+                badge.className = "cloud-badge cloud-disconnected";
+                text.innerText = textOverride || "Setup Firebase Cloud";
+            }
+        }
+
+        /* ==========================================================
+           FIRESTORE REALTIME SYNC LISTENERS
+        ========================================================== */
+        function setupFirestoreListeners() {
+            if (!db) return;
+
+            // 1. Listen for Products
+            db.collection("products").orderBy("name").onSnapshot(snapshot => {
+                products = [];
+                snapshot.forEach(doc => {
+                    products.push({ id: doc.id, ...doc.data() });
+                });
+                displayProducts();
+                populateProductDropdown();
+            }, error => {
+                console.error("Products listener error:", error);
+                showToast("Products load pannuvadhil error: " + error.message, "danger");
+            });
+
+            // 2. Listen for Payments (ordered by timestamp desc)
+            db.collection("payments").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+                payments = [];
+                snapshot.forEach(doc => {
+                    payments.push({ id: doc.id, ...doc.data() });
+                });
+                displayPayments();
+            }, error => {
+                console.error("Payments listener error:", error);
+                showToast("Payments load pannuvadhil error: " + error.message, "danger");
+            });
+        }
+
+        /* ==========================================================
+           LOCAL STORAGE FALLBACK (If Firebase not yet set)
+        ========================================================== */
+        function loadLocalData() {
+            products = JSON.parse(
+                localStorage.getItem("TN63_PRODUCTS") || 
+                localStorage.getItem("TN63_ROPE") || 
+                localStorage.getItem("tn63_products")
+            ) || [];
+
+            payments = JSON.parse(
+                localStorage.getItem("TN63_PAYMENTS")
+            ) || [];
+
+            displayProducts();
+            displayPayments();
+            populateProductDropdown();
+        }
+
+        function saveLocalData() {
+            localStorage.setItem("TN63_PRODUCTS", JSON.stringify(products));
+            localStorage.setItem("TN63_PAYMENTS", JSON.stringify(payments));
+        }
+
+        /* ==========================================================
+           TOAST NOTIFICATIONS
+        ========================================================== */
+        function showToast(message, type = 'success') {
+            const container = document.getElementById("toastContainer");
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? '✅' : (type === 'danger' ? '❌' : '⚠️');
+            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        /* ==========================================================
+           CONFIRMATION MODAL
+        ========================================================== */
+        let pendingAction = null;
+        function openModal(title, desc, onConfirm) {
+            document.getElementById("modalTitle").innerText = title;
+            document.getElementById("modalDesc").innerText = desc;
+            pendingAction = onConfirm;
+            document.getElementById("confirmModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("confirmModal").style.display = "none";
+            pendingAction = null;
+        }
+
+        document.getElementById("modalConfirmBtn").onclick = () => {
+            if (pendingAction) pendingAction();
+            closeModal();
+        };
+
+        /* ==========================================================
+           FIREBASE SETTINGS MODAL
+        ========================================================== */
+        function openFirebaseSettings() {
+            document.getElementById("fb_apiKey").value = firebaseConfig.apiKey || defaultFirebaseConfig.apiKey;
+            document.getElementById("fb_projectId").value = firebaseConfig.projectId || defaultFirebaseConfig.projectId;
+            document.getElementById("fb_authDomain").value = firebaseConfig.authDomain || defaultFirebaseConfig.authDomain;
+            document.getElementById("fb_storageBucket").value = firebaseConfig.storageBucket || defaultFirebaseConfig.storageBucket;
+            document.getElementById("fb_appId").value = firebaseConfig.appId || defaultFirebaseConfig.appId;
+            document.getElementById("firebaseModal").style.display = "flex";
+        }
+
+        function closeFirebaseSettings() {
+            document.getElementById("firebaseModal").style.display = "none";
+        }
+
+        function saveFirebaseSettings() {
+            const newConfig = {
+                apiKey: document.getElementById("fb_apiKey").value.trim(),
+                projectId: document.getElementById("fb_projectId").value.trim(),
+                authDomain: document.getElementById("fb_authDomain").value.trim(),
+                storageBucket: document.getElementById("fb_storageBucket").value.trim(),
+                appId: document.getElementById("fb_appId").value.trim()
+            };
+
+            if (!newConfig.apiKey || !newConfig.projectId) {
+                showToast("API Key மற்றும் Project ID கட்டாயம் தேவை!", "warning");
+                return;
+            }
+
+            localStorage.setItem("TN63_FIREBASE_CONFIG", JSON.stringify(newConfig));
+            firebaseConfig = newConfig;
+            closeFirebaseSettings();
+            showToast("Config saved! Re-connecting to Firebase...", "success");
+            setTimeout(() => {
+                window.location.reload();
+            }, 800);
+        }
+
+        /* ==========================================================
+           PRODUCT & STOCK MANAGEMENT (FIREBASE + LOCAL)
+        ========================================================== */
+        async function addProduct() {
+            const name = document.getElementById("name").value.trim();
+            const colour = document.getElementById("colour").value.trim() || "-";
+            const size = document.getElementById("size").value.trim() || "-";
+            const quantity = Number(document.getElementById("quantity").value);
+            const price = Number(document.getElementById("price").value);
+
+            if (!name) {
+                showToast("Product name enter pannunga!", "warning");
+                document.getElementById("name").focus();
+                return;
+            }
+            if (!quantity || quantity <= 0) {
+                showToast("Valid quantity enter pannunga!", "warning");
+                document.getElementById("quantity").focus();
+                return;
+            }
+            if (price < 0) {
+                showToast("Selling price enter pannunga!", "warning");
+                document.getElementById("price").focus();
+                return;
+            }
+
+            const btn = document.getElementById("btnAddStock");
+            btn.disabled = true;
+            btn.innerText = "Saving...";
+
+            try {
+                // Check if already exists
+                const existingProduct = products.find(
+                    p => p.name.toLowerCase() === name.toLowerCase() &&
+                         p.colour.toLowerCase() === colour.toLowerCase() &&
+                         p.size.toLowerCase() === size.toLowerCase()
+                );
+
+                if (isFirebaseActive && db) {
+                    if (existingProduct) {
+                        const newQty = (existingProduct.quantity || 0) + quantity;
+                        await db.collection("products").doc(existingProduct.id).update({
+                            quantity: newQty,
+                            price: price > 0 ? price : existingProduct.price,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        showToast(`Existing product updated in Firebase! New Stock: ${newQty}`);
+                    } else {
+                        await db.collection("products").add({
+                            name,
+                            colour,
+                            size,
+                            quantity,
+                            price: price || 0,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        showToast("Product added to Firebase Cloud successfully!");
+                    }
+                } else {
+                    // Local fallback
+                    if (existingProduct) {
+                        existingProduct.quantity += quantity;
+                        if (price > 0) existingProduct.price = price;
+                        showToast(`Local stock updated! Quantity: ${existingProduct.quantity}`);
+                    } else {
+                        products.push({
+                            id: Date.now().toString(),
+                            name,
+                            colour,
+                            size,
+                            quantity,
+                            price: price || 0
+                        });
+                        showToast("Product added locally (Cloud pending).");
+                    }
+                    saveLocalData();
+                    displayProducts();
+                    populateProductDropdown();
+                }
+
+                clearProductForm();
+            } catch (err) {
+                console.error("Error adding product:", err);
+                showToast("Save pannuvadhil error: " + err.message, "danger");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "<span>➕</span> Add Stock";
+            }
+        }
+
+        function displayProducts(filteredList = null) {
+            const list = filteredList || products;
+            const tableBody = document.getElementById("stockTableBody");
+            tableBody.innerHTML = "";
+
+            if (list.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📦</div>
+                                <p>No products in stock yet. Add your first stock above!</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                list.forEach(item => {
+                    const totalAsset = (item.quantity || 0) * (item.price || 0);
+                    let stockBadge = "";
+
+                    if (item.quantity <= 0) {
+                        stockBadge = `<span class="badge badge-danger">Out of Stock (0)</span>`;
+                    } else if (item.quantity <= 10) {
+                        stockBadge = `<span class="badge badge-warning">Low Stock (${item.quantity})</span>`;
+                    } else {
+                        stockBadge = `<span class="badge badge-success">In Stock (${item.quantity})</span>`;
+                    }
+
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td><strong>${item.name}</strong></td>
+                        <td>${item.colour}</td>
+                        <td>${item.size}</td>
+                        <td>${stockBadge}</td>
+                        <td class="price-text">₹${(item.price || 0).toLocaleString('en-IN')}</td>
+                        <td class="price-text">₹${totalAsset.toLocaleString('en-IN')}</td>
+                        <td>
+                            <div class="action-btns" style="justify-content: center;">
+                                <button class="btn btn-sm btn-sell" title="Sell 1 unit" onclick="sellOne('${item.id}')">
+                                    🛒 Sell 1
+                                </button>
+                                <button class="btn btn-sm btn-add-unit" title="Add 1 unit" onclick="quickAddOne('${item.id}')">
+                                    ➕ 1
+                                </button>
+                                <button class="btn btn-sm btn-delete" title="Delete product" onclick="confirmDeleteProduct('${item.id}')">
+                                    🗑️
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            document.getElementById("productCountBadge").innerText = `${products.length} Products`;
+            updateDashboard();
+        }
+
+        async function sellOne(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            if (product.quantity <= 0) {
+                showToast("Stock mudinjidhu (Out of Stock)!", "danger");
+                return;
+            }
+
+            if (isFirebaseActive && db) {
+                try {
+                    await db.collection("products").doc(id).update({
+                        quantity: firebase.firestore.FieldValue.increment(-1)
+                    });
+                    showToast(`1 unit of "${product.name}" sold (synced to cloud)!`);
+                } catch (err) {
+                    showToast("Update error: " + err.message, "danger");
+                }
+            } else {
+                product.quantity--;
+                saveLocalData();
+                displayProducts();
+                showToast(`1 unit of "${product.name}" sold locally! Remaining: ${product.quantity}`);
+            }
+        }
+
+        async function quickAddOne(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            if (isFirebaseActive && db) {
+                try {
+                    await db.collection("products").doc(id).update({
+                        quantity: firebase.firestore.FieldValue.increment(1)
+                    });
+                    showToast(`1 unit added to "${product.name}" on Cloud!`);
+                } catch (err) {
+                    showToast("Update error: " + err.message, "danger");
+                }
+            } else {
+                product.quantity++;
+                saveLocalData();
+                displayProducts();
+                showToast(`1 unit added to "${product.name}" locally!`);
+            }
+        }
+
+        function confirmDeleteProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            openModal(
+                "Delete Product from Cloud?",
+                `"${product.name}" (${product.colour} - ${product.size}) will be deleted from the database.`,
+                async () => {
+                    if (isFirebaseActive && db) {
+                        try {
+                            await db.collection("products").doc(id).delete();
+                            showToast("Product deleted from Firebase!", "warning");
+                        } catch (err) {
+                            showToast("Delete error: " + err.message, "danger");
+                        }
+                    } else {
+                        products = products.filter(p => p.id !== id);
+                        saveLocalData();
+                        displayProducts();
+                        populateProductDropdown();
+                        showToast("Product deleted locally.", "warning");
+                    }
+                }
+            );
+        }
+
+        function filterStock() {
+            const term = document.getElementById("stockSearch").value.toLowerCase();
+            const filtered = products.filter(p => 
+                p.name.toLowerCase().includes(term) ||
+                p.colour.toLowerCase().includes(term) ||
+                p.size.toLowerCase().includes(term)
+            );
+            displayProducts(filtered);
+        }
+
+        function clearProductForm() {
+            document.getElementById("name").value = "";
+            document.getElementById("colour").value = "";
+            document.getElementById("size").value = "";
+            document.getElementById("quantity").value = "";
+            document.getElementById("price").value = "";
+        }
+
+        /* ==========================================================
+           SALES & PAYMENT MANAGEMENT (FIREBASE + LOCAL)
+        ========================================================== */
+        function populateProductDropdown() {
+            const select = document.getElementById("saleProductSelect");
+            const currentSelected = select.value;
+            select.innerHTML = '<option value="">-- Choose Product --</option>';
+
+            products.forEach(p => {
+                const opt = document.createElement("option");
+                opt.value = p.id;
+                opt.text = `${p.name} (${p.colour} - ${p.size}) - ₹${p.price} [Stock: ${p.quantity}]`;
+                select.appendChild(opt);
+            });
+
+            if (currentSelected) select.value = currentSelected;
+        }
+
+        function onProductSelectChange() {
+            const productId = document.getElementById("saleProductSelect").value;
+            const product = products.find(p => p.id == productId);
+
+            if (product) {
+                const qtyInput = document.getElementById("saleQuantity");
+                if (!qtyInput.value || Number(qtyInput.value) <= 0) {
+                    qtyInput.value = 1;
+                }
+                calculateTotalAmount();
+            }
+        }
+
+        function calculateTotalAmount() {
+            const productId = document.getElementById("saleProductSelect").value;
+            const product = products.find(p => p.id == productId);
+            const qty = Number(document.getElementById("saleQuantity").value) || 0;
+
+            if (product && qty > 0) {
+                const total = qty * product.price;
+                document.getElementById("totalAmount").value = total;
+                document.getElementById("paidAmount").value = total;
+            }
+        }
+
+        let currentPaymentFilter = 'all';
+        let activeCollectPaymentId = null;
+
+        function setPaymentFilter(type) {
+            currentPaymentFilter = type;
+            document.getElementById("tabAllPayments").className = `tab-btn ${type === 'all' ? 'active' : ''}`;
+            document.getElementById("tabPendingPayments").className = `tab-btn tab-pending ${type === 'pending' ? 'active' : ''}`;
+            displayPayments();
+        }
+
+        async function addPayment() {
+            const customer = document.getElementById("customer").value.trim();
+            const phone = document.getElementById("customerPhone").value.trim();
+            const productId = document.getElementById("saleProductSelect").value;
+            const quantity = Number(document.getElementById("saleQuantity").value);
+            const total = Number(document.getElementById("totalAmount").value);
+            const paid = Number(document.getElementById("paidAmount").value);
+            const method = document.getElementById("paymentMethod").value;
+
+            if (!customer) {
+                showToast("Customer name type pannunga!", "warning");
+                document.getElementById("customer").focus();
+                return;
+            }
+            if (!productId) {
+                showToast("Oru product select pannunga!", "warning");
+                document.getElementById("saleProductSelect").focus();
+                return;
+            }
+            if (!quantity || quantity <= 0) {
+                showToast("Quantity correct-ah enter pannunga!", "warning");
+                document.getElementById("saleQuantity").focus();
+                return;
+            }
+            if (total <= 0) {
+                showToast("Total amount 0-kku mela irukkanum!", "warning");
+                document.getElementById("totalAmount").focus();
+                return;
+            }
+            if (paid < 0 || paid > total) {
+                showToast("Paid amount total-a vida athigamaaga irukka mudiyathu!", "warning");
+                document.getElementById("paidAmount").focus();
+                return;
+            }
+
+            const product = products.find(p => p.id == productId);
+            const productName = product ? `${product.name} (${product.colour} - ${product.size})` : "Item";
+
+            const btn = document.getElementById("btnSavePayment");
+            btn.disabled = true;
+            btn.innerText = "Saving...";
+
+            const pending = total - paid;
+            const record = {
+                date: new Date().toLocaleDateString('en-IN'),
+                customer,
+                phone: phone || "",
+                product: productName,
+                quantity,
+                total,
+                paid,
+                pending,
+                method,
+                createdAt: Date.now()
+            };
+
+            try {
+                if (isFirebaseActive && db) {
+                    await db.collection("payments").add({
+                        ...record,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    if (product) {
+                        const remaining = Math.max(0, product.quantity - quantity);
+                        await db.collection("products").doc(productId).update({
+                            quantity: remaining
+                        });
+                    }
+
+                    showToast("Payment record saved to Firebase Cloud!");
+                } else {
+                    if (product) {
+                        product.quantity = Math.max(0, product.quantity - quantity);
+                    }
+                    payments.unshift({ id: Date.now().toString(), ...record });
+                    saveLocalData();
+                    displayProducts();
+                    displayPayments();
+                    showToast("Payment saved locally.");
+                }
+
+                clearPaymentForm();
+            } catch (err) {
+                console.error("Payment save error:", err);
+                showToast("Payment save error: " + err.message, "danger");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "<span>💾</span> Save Record";
+            }
+        }
+
+        function displayPayments(filteredList = null) {
+            // Count total pending dues
+            const pendingCount = payments.filter(p => (Number(p.pending) || 0) > 0).length;
+            const badge = document.getElementById("pendingCountBadge");
+            if (badge) badge.innerText = pendingCount;
+
+            let list = filteredList;
+            if (!list) {
+                if (currentPaymentFilter === 'pending') {
+                    list = payments.filter(p => (Number(p.pending) || 0) > 0);
+                } else {
+                    list = payments;
+                }
+            }
+
+            const tableBody = document.getElementById("paymentTableBody");
+            tableBody.innerHTML = "";
+
+            if (list.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🧾</div>
+                                <p>${currentPaymentFilter === 'pending' ? 'No pending dues! All payments are fully cleared! 🎉' : 'No sales or payment records found yet.'}</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                list.forEach(p => {
+                    const isPending = (p.pending || 0) > 0;
+                    const statusBadge = isPending 
+                        ? `<span class="badge badge-danger">Pending: ₹${(p.pending || 0).toLocaleString('en-IN')}</span>`
+                        : `<span class="badge badge-success">Fully Paid</span>`;
+
+                    const row = document.createElement("tr");
+                    if (isPending) row.className = "row-pending";
+
+                    const phoneDisplay = p.phone ? `<br><span style="font-size:11.5px; color:#64748b; font-weight:600;">📱 ${p.phone}</span>` : "";
+
+                    row.innerHTML = `
+                        <td style="color:#64748b; font-size:12.5px;">${p.date || '-'}</td>
+                        <td><strong>${p.customer}</strong>${phoneDisplay}</td>
+                        <td>${p.product}</td>
+                        <td>${p.quantity}</td>
+                        <td class="price-text">₹${(p.total || 0).toLocaleString('en-IN')}</td>
+                        <td style="color:#15803d; font-weight:700;">₹${(p.paid || 0).toLocaleString('en-IN')}</td>
+                        <td>${statusBadge}</td>
+                        <td><span class="badge-method">${p.method || 'Cash'}</span></td>
+                        <td>
+                            <div class="action-btns" style="justify-content: center;">
+                                ${isPending ? `
+                                    <button class="btn btn-sm btn-whatsapp" title="Send WhatsApp Due Reminder" onclick="sendWhatsAppReminder('${p.id}')">
+                                        📲 Remind
+                                    </button>
+                                    <button class="btn btn-sm btn-collect" title="Collect pending due" onclick="openCollectModal('${p.id}')">
+                                        💵 Settle
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-sm btn-delete" title="Delete record" onclick="confirmDeletePayment('${p.id}')">
+                                    🗑️
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            document.getElementById("paymentCountBadge").innerText = `${payments.length} Records`;
+            updateDashboard();
+        }
+
+        /* ==========================================================
+           WHATSAPP REMINDER NOTIFICATION
+        ========================================================== */
+        function sendWhatsAppReminder(id) {
+            const payment = payments.find(p => p.id === id);
+            if (!payment) return;
+
+            const dueAmount = (payment.pending || 0).toLocaleString('en-IN');
+            const message = 
+`வணக்கம் ${payment.customer},
+
+TN63_ROPE-ல் தாங்கள் வாங்கிய ${payment.product} (Qty: ${payment.quantity})-க்கான மீதி நிலுவைத் தொகை ₹${dueAmount} உள்ளது.
+
+தயவுசெய்து GPay / UPI அல்லது பணமாக செலுத்துமாறு அன்புடன் கேட்டுக்கொள்கிறோம்.
+
+நன்றி!
+- TN63_ROPE (Stock & Sales)`;
+
+            let cleanPhone = (payment.phone || "").replace(/[^0-9]/g, "");
+
+            if (cleanPhone.length >= 10) {
+                // If 10-digit number, prepend 91 (India)
+                const fullPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+                window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(message)}`, '_blank');
+            } else {
+                // Ask user for phone number if not saved earlier
+                const enteredPhone = prompt(
+                    `"${payment.customer}" அவர்களின் 10 இலக்க WhatsApp மொபைல் எண்ணை உள்ளிடவும்:`,
+                    ""
+                );
+
+                if (enteredPhone && enteredPhone.trim() !== "") {
+                    cleanPhone = enteredPhone.replace(/[^0-9]/g, "");
+                    const fullPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+                    window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(message)}`, '_blank');
+                } else if (enteredPhone !== null) {
+                    // Open WhatsApp Web with text pre-filled so they can pick any contact
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+                }
+            }
+        }
+
+        /* ==========================================================
+           COLLECT DUE SETTLEMENT
+        ========================================================== */
+        function openCollectModal(id) {
+            const payment = payments.find(p => p.id === id);
+            if (!payment) return;
+
+            activeCollectPaymentId = id;
+            const detailsBox = document.getElementById("collectCustomerDetails");
+            detailsBox.innerHTML = `
+                <div>Customer: <strong>${payment.customer}</strong> ${payment.phone ? `(📱 ${payment.phone})` : ''}</div>
+                <div>Product: <strong>${payment.product}</strong></div>
+                <div style="margin-top:6px; display:flex; justify-content:space-between;">
+                    <span>Total Bill: <strong>₹${(payment.total || 0).toLocaleString('en-IN')}</strong></span>
+                    <span>Paid So Far: <strong style="color:#15803d;">₹${(payment.paid || 0).toLocaleString('en-IN')}</strong></span>
+                </div>
+                <div style="margin-top:6px; font-size:15px; font-weight:800; color:#dc2626;">
+                    Pending Due: ₹${(payment.pending || 0).toLocaleString('en-IN')}
+                </div>
+            `;
+
+            document.getElementById("collectDueAmount").value = payment.pending || 0;
+            document.getElementById("collectDueModal").style.display = "flex";
+        }
+
+        function closeCollectModal() {
+            document.getElementById("collectDueModal").style.display = "none";
+            activeCollectPaymentId = null;
+        }
+
+        async function submitCollectDue() {
+            if (!activeCollectPaymentId) return;
+            const payment = payments.find(p => p.id === activeCollectPaymentId);
+            if (!payment) return;
+
+            const payingNow = Number(document.getElementById("collectDueAmount").value);
+            const method = document.getElementById("collectDueMethod").value;
+
+            if (!payingNow || payingNow <= 0) {
+                showToast("செலுத்தும் தொகையை சரியாக உள்ளிடவும்!", "warning");
+                return;
+            }
+            if (payingNow > (payment.pending || 0)) {
+                showToast("நிலுவைத் தொகையை விட அதிக பணம் உள்ளிட முடியாது!", "warning");
+                return;
+            }
+
+            const newPaid = (payment.paid || 0) + payingNow;
+            const newPending = Math.max(0, (payment.pending || 0) - payingNow);
+
+            const btn = document.getElementById("btnSaveCollectDue");
+            btn.disabled = true;
+            btn.innerText = "Updating...";
+
+            try {
+                if (isFirebaseActive && db) {
+                    await db.collection("payments").doc(activeCollectPaymentId).update({
+                        paid: newPaid,
+                        pending: newPending,
+                        method: method,
+                        lastSettledAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showToast(`₹${payingNow.toLocaleString('en-IN')} collected! Cloud updated.`, "success");
+                } else {
+                    payment.paid = newPaid;
+                    payment.pending = newPending;
+                    payment.method = method;
+                    saveLocalData();
+                    displayPayments();
+                    showToast(`₹${payingNow.toLocaleString('en-IN')} collected locally.`, "success");
+                }
+
+                closeCollectModal();
+            } catch (err) {
+                showToast("Update error: " + err.message, "danger");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "✓ Update & Settle";
+            }
+        }
+
+        function confirmDeletePayment(id) {
+            openModal(
+                "Delete Payment from Cloud?",
+                "Are you sure you want to permanently delete this payment transaction?",
+                async () => {
+                    if (isFirebaseActive && db) {
+                        try {
+                            await db.collection("payments").doc(id).delete();
+                            showToast("Payment deleted from Firebase!", "warning");
+                        } catch (err) {
+                            showToast("Delete error: " + err.message, "danger");
+                        }
+                    } else {
+                        payments = payments.filter(p => p.id !== id);
+                        saveLocalData();
+                        displayPayments();
+                        showToast("Payment deleted locally.", "warning");
+                    }
+                }
+            );
+        }
+
+        function filterPayments() {
+            const term = document.getElementById("paymentSearch").value.toLowerCase();
+            const filtered = payments.filter(p =>
+                (p.customer || "").toLowerCase().includes(term) ||
+                (p.product || "").toLowerCase().includes(term) ||
+                (p.phone || "").toLowerCase().includes(term) ||
+                (p.date || "").toLowerCase().includes(term)
+            );
+            displayPayments(filtered);
+        }
+
+        function clearPaymentForm() {
+            document.getElementById("customer").value = "";
+            document.getElementById("customerPhone").value = "";
+            document.getElementById("saleProductSelect").value = "";
+            document.getElementById("saleQuantity").value = "";
+            document.getElementById("totalAmount").value = "";
+            document.getElementById("paidAmount").value = "";
+        }
+
+        /* ==========================================================
+           DASHBOARD METRICS CALCULATION
+        ========================================================== */
+        function updateDashboard() {
+            document.getElementById("totalProducts").innerText = products.length;
+
+            const totalStockUnits = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+            document.getElementById("totalStock").innerText = totalStockUnits.toLocaleString('en-IN');
+
+            const totalPaid = payments.reduce((sum, p) => sum + (Number(p.paid) || 0), 0);
+            const totalPending = payments.reduce((sum, p) => sum + (Number(p.pending) || 0), 0);
+
+            document.getElementById("totalPaid").innerText = totalPaid.toLocaleString('en-IN');
+            document.getElementById("totalPending").innerText = totalPending.toLocaleString('en-IN');
+        }
+
+        /* ==========================================================
+           INITIALIZE
+        ========================================================== */
+        initFirebase();
+    </script>
+</body>
+</html>
